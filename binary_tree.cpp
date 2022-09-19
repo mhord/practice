@@ -23,13 +23,11 @@ class Btree
     Node* root();
     void inOrderPrint();
     void postOrderPrint(Node* rootNode);
+    std::vector<int> vectorRead();
     bool operator == (Btree &bTree1)
     {
-      bTree1._inOrderVector.clear();
-      this->_inOrderVector.clear();
-      inOrderVectorCreate(bTree1.root());
-      inOrderVectorCreate(this->root());
-      return bTree1._inOrderVector == this->_inOrderVector;
+      std::vector<int> tree1Vector = bTree1.vectorRead();
+      return (tree1Vector == this->_inOrderVector);
     };
 
   private:
@@ -41,6 +39,13 @@ class Btree
 Btree::Btree(int rootValue)
 {
   _rootNode = new Node(rootValue);
+}
+
+std::vector<int> Btree::vectorRead()
+{
+  _inOrderVector.clear();
+  inOrderVectorCreate(this->root());
+  return _inOrderVector;
 }
 
 void Btree::postOrderPrint(Node* rootNode)
@@ -143,5 +148,8 @@ int main()
   tree1.inOrderPrint();
   std::cout<<std::boolalpha;
   std::cout<<(tree1 == tree0)<<std::endl; 
+  std::vector<int> tree0Vector = tree0.vectorRead();
+  std::vector<int> tree1Vector = tree1.vectorRead();
+  std::cout<<(tree1Vector == tree0Vector)<<std::endl;
 }
 
