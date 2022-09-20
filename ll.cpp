@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 
@@ -27,6 +28,7 @@ class LinkedList
     LinkedList::Node* current();
     int getValue(Node* node);
     void advance();
+    LinkedList* createLinkedList(vector<int> v);
 
   private:
     LinkedList::Node* _head;
@@ -107,6 +109,16 @@ LinkedList::Node* LinkedList::Node::next()
 LinkedList::Node* LinkedList::current()
 {
   return _current;
+}
+
+LinkedList* LinkedList::createLinkedList(vector<int> v)
+{
+  LinkedList* list = new LinkedList(v[0]);
+  for (int i = 1; i < v.size(); i++)
+  {
+    list->append(v[i]);
+  }
+  return list;
 }
 
 int main()
