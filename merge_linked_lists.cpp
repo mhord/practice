@@ -21,6 +21,7 @@ class LinkedList
         void setNext(Node* newNext);
     };
     
+    LinkedList();
     LinkedList(int headVal);
     LinkedList(vector<int> v);
     ~LinkedList();
@@ -55,6 +56,12 @@ LinkedList::Node::~Node()
 {
 }
 
+LinkedList::LinkedList()
+{
+  _head = NULL;
+  _current = NULL;
+}
+
 LinkedList::LinkedList(int headVal)
 {
   _head = new LinkedList::Node(headVal);
@@ -63,6 +70,12 @@ LinkedList::LinkedList(int headVal)
 
 LinkedList::LinkedList(vector<int> v)
 {
+  if (v.empty()) 
+  {
+    _head = NULL;
+    _current = NULL;
+    return;
+  }
   _head = new LinkedList::Node(v[0]);
   for (int i = 1; i < v.size(); i++)
   {
@@ -95,8 +108,15 @@ void LinkedList::prepend(int value)
 void LinkedList::append(int value)
 {
   LinkedList::Node* tempCurrent = _head;
-  while (tempCurrent->next() != NULL) tempCurrent = tempCurrent->next();
-  this->insert(value, tempCurrent); 
+  if (tempCurrent != NULL)
+  {
+    while (tempCurrent->next() != NULL) tempCurrent = tempCurrent->next();
+    this->insert(value, tempCurrent); 
+    return;
+  }
+  LinkedList::Node* newNode = new LinkedList::Node(value);
+  _head = newNode;
+  _current = _head;
 }
 
 int LinkedList::Node::getValue()
@@ -116,10 +136,8 @@ void LinkedList::Node::setNext(Node* newNext)
 
 void LinkedList::advance()
 {
-  if (_current->next() != NULL) 
-  {
-    _current = _current->next();
-  }
+  if (_current == NULL) return;
+  _current = _current->next();
 }
  
 LinkedList::Node* LinkedList::Node::next()
@@ -135,67 +153,108 @@ LinkedList::Node* LinkedList::current()
 LinkedList* mergeSorted(LinkedList* list0, LinkedList* list1)
 {
   LinkedList* firstList, *secondList;
-  int x = list0->head()->getValue();
-  int y = list1->head()->getValue();
-  if (x < y)
+  int x, y;
+  LinkedList* merged = new LinkedList();
+  if (list0->head() != NULL && list1->head() != NULL)
+  {
+    x = list0->head()->getValue();
+    y = list1->head()->getValue();
+    if (x < y)
+    {
+      firstList = list0;
+      secondList = list1;
+    }
+    else
+    {
+      firstList = list1;
+      secondList = list0;
+    }
+
+    merged->append(firstList->current()->getValue());
+    firstList->advance();
+
+    do
+    {
+      if (firstList->current()->getValue() < secondList->current()->getValue())
+      {
+        merged->append(firstList->current()->getValue());
+        firstList->advance();
+      }
+      else
+      {
+        merged->append(secondList->current()->getValue());
+        secondList->advance();
+      }
+    } while (firstList->current() != NULL && secondList->current() != NULL);
+  }
+  else
   {
     firstList = list0;
     secondList = list1;
   }
-  else
+  if (firstList->current() != NULL)
   {
-    firstList = list1;
-    secondList = list0;
-  }
-
-  firstList->advance();
-
-  LinkedList* merged = new LinkedList(firstList->head()->getValue());
-  while (firstList->current()->next() != NULL && secondList->current()->next() != NULL)
-  {
-    if (firstList->current()->getValue() < secondList->current()->getValue())
+    do
     {
       merged->append(firstList->current()->getValue());
       firstList->advance();
-    }
-    else
+    } while (firstList->current() != NULL);
+  }
+  if (secondList->current() != NULL)
+  {
+    do
     {
       merged->append(secondList->current()->getValue());
       secondList->advance();
-    }
+    } while (secondList->current() != NULL);
   }
-  if (firstList->current()->next() == NULL)
-  {
-    while (secondList->current()->next() != NULL)
-    {
-      merged->append(secondList->current()->getValue());
-      secondList->advance();
-    }
-  }
-  else
-  {
-    while (firstList->current()->next() != NULL)
-    {
-      merged->append(firstList->current()->getValue());
-      firstList->advance();
-    }
-  }
+  
   return merged;
 }
 
 bool LinkedList::operator == (LinkedList& list2)
 {
+  LinkedList::Node* temp1 = this->head();
+  LinkedList::Node* temp2 = list2.head();
+
+  while (temp1 != NULL && temp2 != NULL)
+  {
+    if (temp1->getValue() != temp2->getValue()) return false;
+    temp1 = temp1->next();
+    temp2 = temp2->next();
+  }
+  if (temp1 != NULL) return false;
+  if (temp2 != NULL) return false;
+
   return true;
+}
+
+void printLinkedList(LinkedList* list)
+{
+  int limit = 0;
+  if (list->head() != NULL)
+  {
+    while (list->current()->next() != NULL)
+    {
+      cout<<list->current()->getValue()<<" ";
+      list->advance();
+      if (limit > 20) break;
+    }
+    cout<<list->current()->getValue()<<endl;
+  }
 }
 
 void test(vector<int>& v1, vector<int>& v2, vector<int>& expected) {
   LinkedList list1(v1);
   LinkedList list2(v2);
-  LinkedList* merged = mergeSorted(&list1, &list2);
-
   LinkedList expectedList(expected);
 
-  cout<<boolalpha<<(*merged == expectedList);
+  LinkedList* merged = mergeSorted(&list1, &list2);
+  
+  printLinkedList(&expectedList);
+  printLinkedList(merged); 
+
+  cout<<boolalpha<<(*merged == expectedList)<<endl;
   
 }
 
@@ -217,11 +276,11 @@ int main(int argc, char* argv[]) {
   v2 = {2, 4, 6, 20};
   expected = {1, 2, 3, 4, 5, 6, 6, 20};
 
-  //test(v1, v2, expected);
+  test(v1, v2, expected);
   v1 = {4, 4};
   v2 = {4, 4, 4};
   expected = {4, 4, 4, 4 ,4};
 
-  //test(v1, v2, expected);
+  test(v1, v2, expected);
 }
 
