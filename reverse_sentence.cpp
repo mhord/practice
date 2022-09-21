@@ -32,6 +32,6 @@ void reverseSentence(string & str)
 
 int main()
 {
-  string str = "Hello world!";
+  string str = "The quick red fox jumped over the lazy brown dog.";
   reverseSentence(str);
 }
